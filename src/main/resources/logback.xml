@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!--  name属性值可以按照需求自定义，class属性，ConsoleAppender表示控制台日志输出器进行配置  -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!--  pattern标签描述日志输出格式  -->
+            <!--
+            [%thread] 表示输出日志的线程名
+            %d{HH:mm:ss.SSS} 表示输出日志的时间
+            %-5level %level表示日志级别，-5表示以五个字符进行右对齐
+            %logger{36} %logger表示输出日志的类,{36}表示这段字符最多不超过36个字符
+            %msg 表示输出的具体日志信息
+            %n 表示换行
+            -->
+            <pattern>[%thread] %d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--
+        日志输出级别(优先级高到低):
+        error: 错误 - 系统的故障日志
+        warn: 警告 - 存在风险或使用不当的日志
+        info: 一般性消息
+        debug: 程序内部用于调试信息
+        trace: 程序运行的跟踪信息
+     -->
+    <!--
+        在生产环境时，一般输出info等级以上的日志
+        在开发环境时，一般输出debug等级以上的日志，方便调试
+      -->
+    <root level="debug">
+        <!--  引用上文定义的appender，appender的name属性与ref属性一致  -->
+        <appender-ref ref="console"/>
+    </root>
+    <!-- 这段root表示，日志输出在debug等级以上的都使用上文定义的appender进行输出  -->
+</configuration>

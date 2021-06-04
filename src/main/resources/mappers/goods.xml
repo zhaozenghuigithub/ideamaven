@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="goods">
+
+    <select id="selectAll" resultType="com.zzh.mybatis.entity.Goods">
+        SELECT * FROM t_goods ORDER BY goods_id DESC LIMIT 10
+    </select>
+
+    <!-- 单参数传递,使用parameterType指定参数的数据类型即可,SQL中#{value}提取参数-->
+    <select id="selectById" parameterType="Integer" resultType="com.zzh.mybatis.entity.Goods">
+        SELECT *FROM t_goods WHERE goods_id= #{value}
+    </select>
+
+    <!-- 多参数传递时,使用parameterType指定Map接口,SQL中#{key}提取参数 -->
+    <select id="selectByPriceRange" parameterType="java.util.Map" resultType="com.zzh.mybatis.entity.Goods">
+        SELECT * FROM t_goods WHERE current_price BETWEEN #{min} AND #{max} ORDER BY current_price LIMIT 0,#{limit}
+    </select>
+
+    <!-- 利用LinkedHashMap保存多表关联结果
+    MyBatis会将每一条记录包装为LinkedHashMap对象
+    key是字段名  value是字段对应的值 , 字段类型根据表结构进行自动判断
+    优点: 易于扩展,易于使用
+    缺点: 太过灵活,无法进行编译时检查
+ -->
+    <select id="selectGoodsMap" resultType="java.util.LinkedHashMap">
+        SELECT t_goods.*,t_category.category_name FROM t_goods,t_category WHERE
+        t_goods.category_id=t_category.category_id
+    </select>
+
+
+    <resultMap id="rmGoods" type="com.zzh.mybatis.dto.GoodsDTO">
+        <!--设置主键字段与属性映射-->
+        <id property="goods.goodsId" column="goods_id"></id>
+        <!--设置非主键字段与属性映射-->
+        <result property="goods.title" column="title"></result>
+        <result property="goods.subTitle" column="sub_title"></result>
+        <result property="goods.originalCost" column="original_cost"></result>
+        <result property="goods.currentPrice" column="current_price"></result>
+        <result property="goods.discount" column="discount"></result>
+        <result property="goods.isFreeDelivery" column="is_free_delivery"></result>
+        <result property="goods.categoryId" column="category_id"></result>
+        <result property="category.categoryId" column="category_id"></result>
+        <result property="category.categoryName" column="category_name"></result>
+        <result property="category.parentId" column="parent_id"></result>
+        <result property="category.categoryLevel" column="category_level"></result>
+        <result property="category.categoryOrder" column="category_order"></result>
+        <result property="test" column="test"/>
+    </resultMap>
+
+    <select id="selectGoodsDTO" resultMap="rmGoods">
+        SELECT t_goods.*,t_category.*,'1' AS test FROM t_goods,t_category WHERE
+        t_goods.category_id=t_category.category_id
+    </select>
+
+    <!--标签将insert的数据的主键返回，直接拿到新增数据的主键，以便后续使用-->
+    <insert id="insert" parameterType="com.zzh.mybatis.entity.Goods">
+        INSERT INTO t_goods(title, sub_title, original_cost, current_price, discount, is_free_delivery, category_id)
+        VALUES (#{title},#{subTitle}, #{originalCost}, #{currentPrice}, #{discount}, #{isFreeDelivery}, #{categoryId})
+        <selectKey resultType="Integer" keyProperty="goodsId" order="AFTER">
+            SELECT last_insert_id()
+        </selectKey>
+    </insert>
+
+    <!--自动返回主键ID 根据数据库驱动生成  只支持自增主键的数据库-->
+    <insert id="insertUseGeneratedKeys" parameterType="com.zzh.mybatis.entity.Goods"
+            useGeneratedKeys="true"
+            keyProperty="goodsId"
+            keyColumn="goods_id">
+        INSERT INTO t_goods(title, sub_title, original_cost, current_price, discount, is_free_delivery, category_id)
+        VALUES (#{title},#{subTitle}, #{originalCost}, #{currentPrice}, #{discount}, #{isFreeDelivery}, #{categoryId})
+    </insert>
+
+    <update id="update" parameterType="com.zzh.mybatis.entity.Goods">
+        UPDATE t_goods
+        SET
+        title = #{title} ,
+        sub_title = #{subTitle} ,
+        original_cost = #{originalCost} ,
+        current_price = #{currentPrice} ,
+        discount = #{discount} ,
+        is_free_delivery = #{isFreeDelivery} ,
+        category_id = #{categoryId}
+        WHERE
+        goods_id = #{goodsId}
+    </update>
+
+    <delete id="delete" parameterType="Integer">
+        DELETE FROM t_goods WHERE goods_id = #{value}
+    </delete>
+</mapper>
